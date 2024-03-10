@@ -170,3 +170,29 @@ def no_error_in_label_name(name,location):
         print(f'line {location}: UNDECLARED_LABEL: {name} used without declaration')
         terminate()
         
+def R_Type_Encoding(line):
+    #    [31: 25]     [24:20]     [19:15]     [14: 12]     [11:7]     [6:0]
+    
+    #     funct7        rs2         rs1        funct3        rd       opcode
+    
+    list1= line.split()
+    list2= list1[1].split(',')
+    list3=[]
+    list3.append(list1[0])
+    for i in list2:
+        list3.append(i)
+    #list3's first element is the instruction (add,sub,and,etc) according to which we will extract our opcode,funct7 and funct3
+    #list3's second,third and fourth value are the rd,rs1 and rs2 registers whose encoding we find out from register encoding disctionary
+    
+    INSTRUCTION=list3[0]
+    FUNCT7= funct7[INSTRUCTION]
+    FUNCT3=funct3[INSTRUCTION]
+    OPCODE=OPCODES[INSTRUCTION]
+    rd=Register_Encoding[list3[1]]
+    rs1=Register_Encoding[list3[2]]
+    rs2=Register_Encoding[list3[3]]
+    binary_answer= FUNCT7+rs2+rs1+FUNCT3+rd+OPCODE
+    print(binary_answer)
+    
+R_Type_Encoding('add s1,s2,s3')
+    
