@@ -123,5 +123,50 @@ funct7={
     'srl':'0000000',
     'or':'0000000',
     'and':'0000000'
-}e={
-  '
+}
+
+
+label_table=dict()
+global Address 
+# flag
+halt_encountered = False  # This will be false until a hlt is enountered, if any instruction is encountered after the variable being true it'll throw an error
+
+
+def binary(num):  # converts any integer into 12 bit binary representation, only valid for 12 bit numbers, i.e. 0 to 4096
+    return "{:012b}".format(num)
+
+
+def terminate():
+    exit(0)
+    
+def go_down_line_by_line(line,location):
+    global Address
+    if not line:
+        return
+    elif line[-1] == ':':
+        label_name = line[:-1].lstrip()
+        if label_name in label_table:
+            print(f'line {location}: ILLEGAL_LABEL: {label_name} already a label')
+            terminate()
+        label_table[label_name] = Address
+    elif halt_encountered:
+        print(f'line {location}: ILLEGAL_COMMAND: HALT already encountered')
+        terminate()
+    else:
+        check_instruction(line,location)
+        Address +=1
+        
+def no_error_in_register_name(register,location):
+    if register not in Register_Encoding.keys():
+        print(f'line {location}: ILLEGAL_REGISTER_ERROR: {register} not a valid register. ')
+        terminate()
+    
+def out_of_bound_length(value,location):
+    if value<=0 or value>=4095:
+        print(f'line {location}: OVERFLOW: {value} not in the range 0-4095')
+
+def no_error_in_label_name(name,location): 
+    if name not in label_table:
+        print(f'line {location}: UNDECLARED_LABEL: {name} used without declaration')
+        terminate()
+        
