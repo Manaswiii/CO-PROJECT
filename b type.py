@@ -8,22 +8,18 @@ def B_Type_Encoding(line,location):
     list1=line.split()
     list2= list1[1].split(',')
     
-    list4=[]
-    list4.append(list1[0])
-    list4.append(list2[0])
-    list4.append(list3[0])
-    element=list3[1][:-1]
-    list4.append(element)
-    #now my list4 contains first element as instruction sw, thn second element as rs2, third element as immediate value and foruth value as the rs1
 
-    INSTRUCTION=list4[0]
+  
+    #now my list4 contains first element as instruction blt, thn second element as rs2, third element as immediate value and foruth value as the rs1
+
+    INSTRUCTION=list1[0]
     FUNCT3=funct3[INSTRUCTION]
     OPCODE=OPCODES[INSTRUCTION]
     #FUNCT3 and OPCODE are the funct3 and opcode corresponding to the instruction
-    rs2=Register_Encoding[list4[1]]
-    rs1=Register_Encoding[list4[3]]
+    rs2=Register_Encoding[list2[1]]
+    rs1=Register_Encoding[list2[0]]
     #rs1,rs2 are the binary encodings of the given registers
-    IMM=list4[2]
+    IMM=list2[2]
     IMMEDIATE=string_to_12bit_twos_complement_binary(IMM,location)
-    binary_answer= IMMEDIATE[11:5]+rs2+rs1+FUNCT3+IMMEDIATE[4:0]+OPCODE
+    binary_answer= IMMEDIATE[12]+IMMEDIATE[+rs2+rs1+FUNCT3+IMMEDIATE[4:0]+OPCODE
     print(binary_answer)
