@@ -133,6 +133,21 @@ Address =0
 # flag
 halt_encountered = False  # This will be false until a hlt is enountered, if any instruction is encountered after the variable being true it'll throw an error
 
+def remove_whitespace_and_empty_lines(input_filepath, output_filepath):
+    # Read the content of the input file
+    with open(input_filepath, 'r') as file:
+        lines = file.readlines()
+
+    # Remove leading white spaces and empty lines
+    cleaned_lines = [line.strip() for line in lines if line.strip()]
+
+    # Write the cleaned lines to the output file
+    with open(output_filepath, 'w') as file:
+        file.write('\n'.join(cleaned_lines))
+
+# Specify the full path to the input and output files
+# input_filepath = "C:/Users/navsh/OneDrive/Desktop/sample.txt"
+# output_filepath = 'C:/Users/navsh/OneDrive/Desktop/out.txt'
 
 def string_to_n_bit_twos_complement_binary(n, input_string, location):
     try:
