@@ -345,9 +345,9 @@ def I_Type_Encoding(line,location):
     print(binary_answer)
     
 def B_Type_Encoding(line,location):
-    #    [31:25]     [24:20]    [19:15]    [14: 12]    [11:7]    [6:0]
+    #     [31:25]     [24:20]    [19:15]    [14: 12]    [11:7]    [6:0]
     
-    #   imm[12|10:5]      rs2        rs1       funct3    imm[4:1|11]   opcode 
+    #   imm[12|10:5]    rs2        rs1       funct3    imm[4:1|11]   opcode 
 
     list1=line.split()
     list2= list1[1].split(',')
