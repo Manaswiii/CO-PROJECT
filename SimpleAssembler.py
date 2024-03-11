@@ -206,8 +206,11 @@ def go_down_line_by_line(line):
         go_down_line_by_line(line)
         
     elif halt_encountered:
-        print(f'line {location}: ILLEGAL_COMMAND: HALT already encountered')
-        terminate()
+        if line =="beq,zero,zero,0":
+            Address +=4
+        else:
+            print(f'line {location}: ILLEGAL_COMMAND: HALT already encountered')
+            terminate()
     else:
         check_instruction_type(line,location)
         Address +=4
