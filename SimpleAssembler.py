@@ -442,4 +442,5 @@ def J_Type_Encoding(line, location):
         binary_answer = IMMEDIATE[0]+IMMEDIATE[10:20]+IMMEDIATE[9]+IMMEDIATE[1:9] + ra + OPCODE 
         return binary_answer
 
-f=open(
+f=open('automatedTesting/tests/assembly/simpleBin/test1.txt','r')
+remove_whitespace_and_empty_lines("automatedTesting/tests/assembly/simpleBin/test1.txt", output_filepath):
