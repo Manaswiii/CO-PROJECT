@@ -382,26 +382,48 @@ def U_Type_Encoding(line,location) :
 
 
 def J_Type_Encoding(line, location):
-    #        [31:12]                [11:7]    [6:0]
-    
-    # imm[20|10:1|11|19:12]           ra      opcode
+    # [31:12]                [11:7]   [6:0]
+    # imm[20|10:1|11|19:12]   ra      opcode
 
     # jal ra,label
+    
+    # jal zero,0(ra)
     list1 = line.split()
-    list2 = list1[1].split(',')
-    list3 = []
-    list3.append(list1[0])
-    for i in list2:
-        list3.append(i)
-
-    INSTRUCTION = list3[0]
-
+    INSTRUCTION = list1[0]
+    list2 = list1[1].split(",")
+    reg = list2[0]
     OPCODE = OPCODES[INSTRUCTION]
-    # OPCODE is the opcode corresponding to the instruction
-    ra = Register_Encoding[list3[1]]
-
-    # ra are the binary encodings of the given registers
-    IMM = list3[2]
-    IMMEDIATE = string_to_n_bit_twos_complement_binary(21,IMM, 1)
-    binary_answer = IMMEDIATE[0]+IMMEDIATE[10:20]+IMMEDIATE[9]+IMMEDIATE[1:9] + ra + OPCODE 
-    print(binary_answer)
+    # FUNCT3 = funct3[INSTRUCTION]
+    if ')' in list1[1]:
+        list3 = list2[1].split('(')
+        list4 = [INSTRUCTION, reg, list3[1], list3[1][:-1]]
+        IMMEDIATE = string_to_n_bit_twos_complement_binary(21, list4[2], location)
+        rd = Register_Encoding[list4[1]]
+        
+        no_error_in_register_name(list4[1], location)
+        no_error_in_register_name(list4[3], location)
+        binary_answer = IMMEDIATE[0]+IMMEDIATE[10:20]+IMMEDIATE[9]+IMMEDIATE[1:9] + rd + OPCODE 
+        print(binary_answer)
+        
+    else:
+        list1 = line.split()
+        list2 = list1[1].split(',')
+        list3 = []
+        list3.append(list1[0])
+        for i in list2:
+            list3.append(i)
+    
+        INSTRUCTION = list3[0]
+    
+        OPCODE = OPCODES[INSTRUCTION]
+        # OPCODE is the opcode corresponding to the instruction
+        ra = Register_Encoding[list3[1]]
+    
+        # ra are the binary encodings of the given registers
+        IMM = list3[2]
+        IMMEDIATE = string_to_n_bit_twos_complement_binary(21,IMM, 1)
+        binary_answer = IMMEDIATE[0]+IMMEDIATE[10:20]+IMMEDIATE[9]+IMMEDIATE[1:9] + ra + OPCODE 
+        print(IMMEDIATE)
+# Test the function
+J_Type_Encoding("jal ra,-1024", 1) 
+J_Type_Encoding("jal s1,0(s2)", 2)
