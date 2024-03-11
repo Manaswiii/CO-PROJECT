@@ -131,10 +131,27 @@ global Address
 # flag
 halt_encountered = False  # This will be false until a hlt is enountered, if any instruction is encountered after the variable being true it'll throw an error
 
+def string_to_12bit_twos_complement_binary(input_string,location):
+    try:
+        input_integer = int(input_string)
+    except ValueError:
+        print( f'line {location}: ILLEGAL_IMMEDIATE: not a valid integer.')
+        terminate()
 
-def binary(num):  # converts any integer into 12 bit binary representation, only valid for 12 bit numbers, i.e. 0 to 4096
-    answer="{:012b}".format(num)
-    return str(answer)
+    if input_integer < -2**11 or input_integer > 2**11 - 1:
+        print(f"line {location}: OUT_OF_BOUND: Input integer out of range for 12-bit two's complement.")
+        terminate()
+
+    if input_integer < 0:
+        # For negative numbers, we'll use 2's complement representation
+        input_binary = bin((1 << 12) + input_integer)[2:]
+    else:
+        input_binary = bin(input_integer)[2:]
+
+    input_binary = input_binary.zfill(12)
+
+    return input_binary
+    
 
 def terminate():
     exit(0)
@@ -247,7 +264,6 @@ def S_Type_Encoding(line,location):
     rs1=Register_Encoding[list4[3]]
     #rs1,rs2 are the binary encodings of the given registers
     IMM=list4[2]
-    IMMEDIATE=binary(IMM)
-    out_of_bound_length(IMM)
+    IMMEDIATE=string_to_12bit_twos_complement_binary(IMM)
     binary_answer= IMMEDIATE[11:5]+rs2+rs1+FUNCT3+IMMEDIATE[4:0]+OPCODE
     print(binary_answer)
