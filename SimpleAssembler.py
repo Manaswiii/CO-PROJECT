@@ -310,12 +310,10 @@ def B_Type_Encoding(line,location):
     
     #   imm[12|10:5]      rs2        rs1       funct3    imm[4:1|11]   opcode 
     
-    
+
     #blt a4,a5,label
     list1=line.split()
     list2= list1[1].split(',')
-    
-
   
     #now my list4 contains first element as instruction blt, thn second element as rs2, third element as immediate value and foruth value as the rs1
 
@@ -327,7 +325,7 @@ def B_Type_Encoding(line,location):
     rs1=Register_Encoding[list2[0]]
     #rs1,rs2 are the binary encodings of the given registers
     IMM=list2[2]
-    IMMEDIATE=string_to_n_bit_twos_complement_binary(12,IMM,location)
+    IMMEDIATE=string_to_n_bit_twos_complement_binary(13,IMM,location)
     binary_answer= IMMEDIATE[0]+IMMEDIATE[2:8]+rs2+rs1+FUNCT3+IMMEDIATE[8:11]+IMMEDIATE[-1]+IMMEDIATE[1]+OPCODE
     print(binary_answer)
 
@@ -353,5 +351,3 @@ def U_Type_Encoding(line,location) :
         IMMEDIATE = string_to_n_bit_twos_complement_binary(32,IMM,location)
         binary_answer = IMMEDIATE[11:31]+RD+OPCODE
         print(binary_answer)
-
-U_Type_Encoding("auipc s2,-30",3)
