@@ -131,27 +131,26 @@ global Address
 # flag
 halt_encountered = False  # This will be false until a hlt is enountered, if any instruction is encountered after the variable being true it'll throw an error
 
-def string_to_12bit_twos_complement_binary(input_string,location):
+def string_to_n_bit_twos_complement_binary(n,input_string,location):
     try:
         input_integer = int(input_string)
     except ValueError:
         print( f'line {location}: ILLEGAL_IMMEDIATE: not a valid integer.')
         terminate()
 
-    if input_integer < -2**11 or input_integer > 2**11 - 1:
+    if input_integer < -2**(n-1) or input_integer > 2**(n-1) - 1:
         print(f"line {location}: OUT_OF_BOUND: Input integer out of range for 12-bit two's complement.")
         terminate()
 
     if input_integer < 0:
         # For negative numbers, we'll use 2's complement representation
-        input_binary = bin((1 << 12) + input_integer)[2:]
+        input_binary = bin((1 << n) + input_integer)[2:]
     else:
         input_binary = bin(input_integer)[2:]
 
-    input_binary = input_binary.zfill(12)
+    input_binary = input_binary.zfill(n)
 
     return input_binary
-    
 
 def terminate():
     exit(0)
@@ -260,7 +259,7 @@ def S_Type_Encoding(line,location):
     rs1=Register_Encoding[list4[3]]
     #rs1,rs2 are the binary encodings of the given registers
     IMM=list4[2]
-    IMMEDIATE=string_to_12bit_twos_complement_binary(IMM,location)
+    IMMEDIATE=string_to_n_bit_twos_complement_binary(12,IMM,location)
     binary_answer= IMMEDIATE[11:5]+rs2+rs1+FUNCT3+IMMEDIATE[4:0]+OPCODE
     print(binary_answer)
 
@@ -268,6 +267,8 @@ def I_Type_Encoding(line,location):
     #[31:20]     [19:15]    [14:12]    [11:7]   [6:0]
    
     #imm[11:0]     rs1       funct3      rd     opcode
+    
+    #"lw a5,20(s1)"
     
     list1 = line.split()
     INSTRUCTION = list1[0]
@@ -278,7 +279,7 @@ def I_Type_Encoding(line,location):
     if list1[0] == 'lw':
         list3 = list2[1].split('(')
         list4 = [INSTRUCTION,reg,list3[0],list3[1][:-1]]
-        imm = string_to_12bit_twos_complement_binary(list4[2],location)
+        imm = string_to_n_bit_twos_complement_binary(12,list4[2],location)
         rd=Register_Encoding[list4[1]]
         rs1=Register_Encoding[list4[3]]
         no_error_in_register_name(list4[1],location)
@@ -293,11 +294,12 @@ def I_Type_Encoding(line,location):
 
         rd = Register_Encoding[list3[1]]
         rs1 = Register_Encoding[list3[2].rstrip(',')]
-        imm = string_to_12bit_twos_complement_binary(list3[3],location)
+        imm = string_to_n_bit_twos_complement_binary(12,list3[3],location)
         no_error_in_register_name(list3[1],location)
         no_error_in_register_name(list3[2],location)
     binary_answer= imm+rd+FUNCT3+rs1+OPCODE
     print(binary_answer)
+    
 def B_Type_Encoding(line,location):
     #    [31:25]     [24:20]    [19:15]    [14: 12]    [11:7]    [6:0]
     
@@ -320,6 +322,6 @@ def B_Type_Encoding(line,location):
     rs1=Register_Encoding[list2[0]]
     #rs1,rs2 are the binary encodings of the given registers
     IMM=list2[2]
-    IMMEDIATE=string_to_12bit_twos_complement_binary(IMM,location)
+    IMMEDIATE=string_to_n_bit_twos_complement_binary(12,IMM,location)
     binary_answer= IMMEDIATE[0]+IMMEDIATE[2:8]+rs2+rs1+FUNCT3+IMMEDIATE[8:11]+IMMEDIATE[-1]+IMMEDIATE[1]+OPCODE
     print(binary_answer)
