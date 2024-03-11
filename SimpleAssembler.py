@@ -273,7 +273,7 @@ def R_Type_Encoding(line,location):
     rs2=Register_Encoding[list3[3]]
     #rd,rs1,rs2 are the binary encodings of the given registers
     binary_answer= FUNCT7+rs2+rs1+FUNCT3+rd+OPCODE
-    print(binary_answer)
+    return binary_answer
     
     
 def S_Type_Encoding(line,location):
@@ -307,7 +307,7 @@ def S_Type_Encoding(line,location):
     IMM=list4[2]
     IMMEDIATE=string_to_n_bit_twos_complement_binary(12,IMM,location)
     binary_answer= IMMEDIATE[11:5]+rs2+rs1+FUNCT3+IMMEDIATE[4:0]+OPCODE
-    print(binary_answer)
+    return binary_answer
 
 def I_Type_Encoding(line,location):
     #[31:20]     [19:15]    [14:12]    [11:7]   [6:0]
@@ -344,7 +344,7 @@ def I_Type_Encoding(line,location):
         no_error_in_register_name(list3[1],location)
         no_error_in_register_name(list3[2],location)
     binary_answer= imm+rd+FUNCT3+rs1+OPCODE
-    print(binary_answer)
+    return binary_answer
     
 def B_Type_Encoding(line,location):
     #    [31:25]     [24:20]    [19:15]    [14: 12]    [11:7]    [6:0]
@@ -370,7 +370,7 @@ def B_Type_Encoding(line,location):
     IMM=list2[2]
     IMMEDIATE=string_to_n_bit_twos_complement_binary(13,IMM,location)
     binary_answer= IMMEDIATE[0]+IMMEDIATE[2:8]+rs2+rs1+FUNCT3+IMMEDIATE[8:11]+IMMEDIATE[-1]+IMMEDIATE[1]+OPCODE
-    print(binary_answer)
+    return binary_answer
 
 def U_Type_Encoding(line,location) : 
 
@@ -393,7 +393,7 @@ def U_Type_Encoding(line,location) :
         IMM = list3[2]
         IMMEDIATE = string_to_n_bit_twos_complement_binary(32,IMM,location)
         binary_answer = IMMEDIATE[11:31]+RD+OPCODE
-        print(binary_answer)
+        return binary_answer
 
 
 def J_Type_Encoding(line, location):
@@ -420,7 +420,7 @@ def J_Type_Encoding(line, location):
         no_error_in_register_name(list4[1], location)
         no_error_in_register_name(list4[3], location)
         binary_answer = IMMEDIATE[0]+IMMEDIATE[10:20]+IMMEDIATE[9]+IMMEDIATE[1:9] + rd + OPCODE 
-        print(binary_answer)
+        return binary_answer
         
     else:
         list1 = line.split()
@@ -440,4 +440,6 @@ def J_Type_Encoding(line, location):
         IMM = list3[2]
         IMMEDIATE = string_to_n_bit_twos_complement_binary(21,IMM, 1)
         binary_answer = IMMEDIATE[0]+IMMEDIATE[10:20]+IMMEDIATE[9]+IMMEDIATE[1:9] + ra + OPCODE 
-        print(binary_answer)
+        return binary_answer
+
+f=open(
