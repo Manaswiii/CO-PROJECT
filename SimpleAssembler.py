@@ -351,3 +351,32 @@ def U_Type_Encoding(line,location) :
         IMMEDIATE = string_to_n_bit_twos_complement_binary(32,IMM,location)
         binary_answer = IMMEDIATE[11:31]+RD+OPCODE
         print(binary_answer)
+
+def J_Type_Encoding(line, location):
+    # [31:12]                [11:7]   [6:0]
+    # imm[20|10:1|11|19:12]   ra      opcode
+
+    # jal ra,label
+    list1 = line.split()
+    list2 = list1[1].split(',')
+    list3 = []
+    list3.append(list1[0])
+    for i in list2:
+        list3.append(i)
+
+    INSTRUCTION = list3[0]
+
+    OPCODE = OPCODES[INSTRUCTION]
+    # OPCODE is the opcode corresponding to the instruction
+    ra = Register_Encoding[list3[1]]
+
+    # ra are the binary encodings of the given registers
+    IMM = list3[2]
+    IMMEDIATE = string_to_n_bit_twos_complement_binary(21,IMM, 1)
+    binary_answer = IMMEDIATE[0]+IMMEDIATE[10:20]+IMMEDIATE[9]+IMMEDIATE[1:9] + ra + OPCODE 
+    print(binary_answer)
+    
+
+
+
+J_Type_Encoding("jal ra,-1024", 1) 
