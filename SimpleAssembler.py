@@ -263,3 +263,38 @@ def S_Type_Encoding(line,location):
     IMMEDIATE=string_to_12bit_twos_complement_binary(IMM,location)
     binary_answer= IMMEDIATE[11:5]+rs2+rs1+FUNCT3+IMMEDIATE[4:0]+OPCODE
     print(binary_answer)
+
+def I_Type_Encoding(line,location):
+    #[31:20]     [19:15]    [14:12]    [11:7]   [6:0]
+   
+    #imm[11:0]     rs1       funct3      rd     opcode
+    
+    list1 = line.split()
+    INSTRUCTION = list1[0]
+    list2=list1[1].split(",")
+    reg = list2[0]
+    OPCODE=OPCODES[INSTRUCTION]
+    FUNCT3 = funct3[INSTRUCTION]
+    if list1[0] == 'lw':
+        list3 = list2[1].split('(')
+        list4 = [INSTRUCTION,reg,list3[0],list3[1][:-1]]
+        imm = string_to_12bit_twos_complement_binary(list4[2],location)
+        rd=Register_Encoding[list4[1]]
+        rs1=Register_Encoding[list4[3]]
+        no_error_in_register_name(list4[1],location)
+        no_error_in_register_name(list4[3],location)
+
+    else:
+        list2 = list1[1].split(',')
+        list3 = []
+        list3.append(list1[0])
+        for i in list2:
+            list3.append(i)
+
+        rd = Register_Encoding[list3[1]]
+        rs1 = Register_Encoding[list3[2].rstrip(',')]
+        imm = string_to_12bit_twos_complement_binary(list3[3],location)
+        no_error_in_register_name(list3[1],location)
+        no_error_in_register_name(list3[2],location)
+    binary_answer= imm+rd+FUNCT3+rs1+OPCODE
+    print(binary_answer)
