@@ -443,7 +443,14 @@ def J_Type_Encoding(line, location):
         return binary_answer
 
 f=open('automatedTesting/tests/assembly/simpleBin/test1.txt','r')
-remove_whitespace_and_empty_lines("automatedTesting/tests/assembly/simpleBin/test1.txt", "output/test1.txt")
+remove_whitespace_and_empty_lines("automatedTesting/tests/assembly/simpleBin/test1.txt", "automatedTesting/tests/assembly/Removed_Whitespaces_and_empty_line/test1.txt")
+g=open("automatedTesting/tests/assembly/Removed_Whitespaces_and_empty_line/test1.txt","r")
+h=open("output/test1.txt",'w')
+for line in g.readline():
+    h.write(go_down_line_by_line(line))
+f.close()
+g.close()
+h.close()
 
-f=open("output/test1.txt",'w')
+
 
