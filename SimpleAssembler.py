@@ -12,7 +12,7 @@ instruction_type={
     'and':'R',
     'addi':'I',
     'lw':'I',
-    'sltui':'I',
+    'sltiu':'I',
     'jalr':'I',
     'sw':'S',
     'beq':'B',
@@ -74,7 +74,7 @@ OPCODES={
     'and':'0110011',
     'addi':'0010011',
     'lw':'0000011',
-    'sltui':'0010011',
+    'sltiu':'0010011',
     'jalr':'1100111',
     'sw':'0100011',
     'beq':'1100011',
@@ -101,7 +101,7 @@ funct3={
     'and':'111',
     'addi':'000',
     'lw':'010',
-    'sltui':'011',
+    'sltiu':'011',
     'jalr':'000',
     'sw':'010',
     'beq':'000',
@@ -153,7 +153,7 @@ def string_to_n_bit_twos_complement_binary(n, input_string, location):
     try:
         input_integer = int(input_string)
     except ValueError:
-        print(f'line {location}: ILLEGAL_IMMEDIATE: Not a valid integer.')
+        print(f'line {Address}: ILLEGAL_IMMEDIATE: Not a valid integer.')
         terminate()
 
     min_value = -2**(n-1)
@@ -195,12 +195,12 @@ location=decimal_to_hexadecimal(Address)
 
 def go_down_line_by_line(line):
     global Address
-    elif is_a_label(line)==True:
+    if is_a_label(line)==True:
         label_name = line.split(":")[0]
         if label_name in label_table:
-            print(f'line {location}: ILLEGAL_LABEL: {label_name} already a label')
+            print(f'line {Address}: ILLEGAL_LABEL: {label_name} already a label')
             terminate()
-        label_table[label_name] = location
+        label_table[label_name] = Address
         x=len(label_name)
         line=line[x+1:]
         go_down_line_by_line(line)
@@ -273,13 +273,13 @@ def R_Type_Encoding(line,location):
     rs2=Register_Encoding[list3[3]]
     #rd,rs1,rs2 are the binary encodings of the given registers
     binary_answer= FUNCT7+rs2+rs1+FUNCT3+rd+OPCODE
-    return binary_answer
+    print(binary_answer)
     
     
 def S_Type_Encoding(line,location):
-    #    [31:25]     [24:20]    [19:15]    [14: 12]    [11:7]       [6:0]
+    #    [31:25]     [24:20]    [19:15]    [14: 12]    [11:7]    [6:0]
     
-    #   imm[11:5]      rs2        rs1       funct3    imm[4:0]      opcode 
+    #   imm[11:5]      rs2        rs1       funct3    imm[4:0]   opcode 
     
     
     #sw ra,32(sp)
@@ -306,16 +306,14 @@ def S_Type_Encoding(line,location):
     #rs1,rs2 are the binary encodings of the given registers
     IMM=list4[2]
     IMMEDIATE=string_to_n_bit_twos_complement_binary(12,IMM,location)
-    binary_answer= IMMEDIATE[11:5]+rs2+rs1+FUNCT3+IMMEDIATE[4:0]+OPCODE
-    return binary_answer
+    binary_answer= IMMEDIATE[0:7]+rs2+rs1+FUNCT3+IMMEDIATE[7:12]+OPCODE
+    print(binary_answer)
 
 def I_Type_Encoding(line,location):
     #[31:20]     [19:15]    [14:12]    [11:7]   [6:0]
    
-    #imm[11:0]     rs1      funct3      rd     opcode
-    
-    #"lw a5,20(s1)"
-    
+    #imm[11:0]     rs1       funct3      rd     opcode
+
     list1 = line.split()
     INSTRUCTION = list1[0]
     list2=list1[1].split(",")
@@ -344,15 +342,13 @@ def I_Type_Encoding(line,location):
         no_error_in_register_name(list3[1],location)
         no_error_in_register_name(list3[2],location)
     binary_answer= imm+rd+FUNCT3+rs1+OPCODE
-    return binary_answer
+    print(binary_answer)
     
 def B_Type_Encoding(line,location):
-    #    [31:25]        [24:20]    [19:15]    [14: 12]      [11:7]       [6:0]
+    #    [31:25]     [24:20]    [19:15]    [14: 12]    [11:7]    [6:0]
     
-    #   imm[12|10:5]      rs2        rs1       funct3     imm[4:1|11]    opcode 
-    
+    #   imm[12|10:5]      rs2        rs1       funct3    imm[4:1|11]   opcode 
 
-    #blt a4,a5,label
     list1=line.split()
     list2= list1[1].split(',')
   
@@ -368,15 +364,15 @@ def B_Type_Encoding(line,location):
     rs1=Register_Encoding[list2[0]]
     #rs1,rs2 are the binary encodings of the given registers
     IMM=list2[2]
-    IMMEDIATE=string_to_n_bit_twos_complement_binary(13,IMM,location)
+    IMMEDIATE=string_to_n_bit_twos_complement_binary(12,IMM,location)
     binary_answer= IMMEDIATE[0]+IMMEDIATE[2:8]+rs2+rs1+FUNCT3+IMMEDIATE[8:11]+IMMEDIATE[-1]+IMMEDIATE[1]+OPCODE
-    return binary_answer
+    print(binary_answer)
 
 def U_Type_Encoding(line,location) : 
 
-    #  [31:12]    [11:7]     [6:0]
+    #  [31:12]    [11:7]   [6:0]
 
-    # imm[31:12]    rd       opcode
+    # imm[31:12]    rd     opcode
 
         list1= line.split()
         list2= list1[1].split(',')
@@ -393,13 +389,13 @@ def U_Type_Encoding(line,location) :
         IMM = list3[2]
         IMMEDIATE = string_to_n_bit_twos_complement_binary(32,IMM,location)
         binary_answer = IMMEDIATE[11:31]+RD+OPCODE
-        return binary_answer
+        print(binary_answer)
 
 
 def J_Type_Encoding(line, location):
-    #         [31:12]           [11:7]    [6:0]
+    #         [31:12]         [11:7]    [6:0]
     
-    # imm[20|10:1|11|19:12]       ra      opcode
+    # imm[20|10:1|11|19:12]     ra      opcode
 
     list1 = line.split()
     INSTRUCTION = list1[0]
@@ -420,7 +416,7 @@ def J_Type_Encoding(line, location):
         no_error_in_register_name(list4[1], location)
         no_error_in_register_name(list4[3], location)
         binary_answer = IMMEDIATE[0]+IMMEDIATE[10:20]+IMMEDIATE[9]+IMMEDIATE[1:9] + rd + OPCODE 
-        return binary_answer
+        print(binary_answer)
         
     else:
         list1 = line.split()
@@ -440,17 +436,10 @@ def J_Type_Encoding(line, location):
         IMM = list3[2]
         IMMEDIATE = string_to_n_bit_twos_complement_binary(21,IMM, 1)
         binary_answer = IMMEDIATE[0]+IMMEDIATE[10:20]+IMMEDIATE[9]+IMMEDIATE[1:9] + ra + OPCODE 
-        return binary_answer
+        print(binary_answer)
 
-f=open('automatedTesting/tests/assembly/simpleBin/test1.txt','r')
-remove_whitespace_and_empty_lines("automatedTesting/tests/assembly/simpleBin/test1.txt", "automatedTesting/tests/assembly/Removed_Whitespaces_and_empty_line/test1.txt")
-g=open("automatedTesting/tests/assembly/Removed_Whitespaces_and_empty_line/test1.txt","r")
-h=open("output/test1.txt",'w')
-for line in g.readline():
-    h.write(go_down_line_by_line(line))
-f.close()
-g.close()
-h.close()
-
+list1=['xor s0,s1,s2', 'addi s3,s4,-50','blt s5,s6,16','auipc t0,-64','jal t1,32','srl t2,t3,t4','sw t5,-20(s0)','sltiu t6,a0,5','sub t1,t3,tp','lw s0,48(gp)','beq zero,zero,0']
+for i in list1:
+     go_down_line_by_line(i)
 
 
