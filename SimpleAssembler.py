@@ -438,8 +438,16 @@ def J_Type_Encoding(line, location):
         binary_answer = IMMEDIATE[0]+IMMEDIATE[10:20]+IMMEDIATE[9]+IMMEDIATE[1:9] + ra + OPCODE 
         print(binary_answer)
 
-list1=['xor s0,s1,s2', 'addi s3,s4,-50','blt s5,s6,16','auipc t0,-64','jal t1,32','srl t2,t3,t4','sw t5,-20(s0)','sltiu t6,a0,5','sub t1,t3,tp','lw s0,48(gp)','beq zero,zero,0']
-for i in list1:
-     go_down_line_by_line(i)
-
+# list1=['xor s0,s1,s2', 'addi s3,s4,-50','blt s5,s6,16','auipc t0,-64','jal t1,32','srl t2,t3,t4','sw t5,-20(s0)','sltiu t6,a0,5','sub t1,t3,tp','lw s0,48(gp)','beq zero,zero,0']
+# for i in list1:
+#      go_down_line_by_line(i)
+f=open('automatedTesting/tests/assembly/simpleBin/test1.txt','r')
+remove_whitespace_and_empty_lines("automatedTesting/tests/assembly/simpleBin/test1.txt", "automatedTesting/tests/assembly/Removed_Whitespaces_and_empty_line/test1.txt")
+g=open("automatedTesting/tests/assembly/Removed_Whitespaces_and_empty_line/test1.txt","r")
+h=open("output/test1.txt",'w')
+for line in g.readline():
+    h.write(go_down_line_by_line(line))
+f.close()
+g.close()
+h.close()
 
