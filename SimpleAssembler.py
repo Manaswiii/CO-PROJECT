@@ -277,9 +277,9 @@ def R_Type_Encoding(line,location):
     
     
 def S_Type_Encoding(line,location):
-    #    [31:25]     [24:20]    [19:15]    [14: 12]    [11:7]    [6:0]
+    #    [31:25]     [24:20]    [19:15]    [14: 12]    [11:7]       [6:0]
     
-    #   imm[11:5]      rs2        rs1       funct3    imm[4:0]   opcode 
+    #   imm[11:5]      rs2        rs1       funct3    imm[4:0]      opcode 
     
     
     #sw ra,32(sp)
@@ -312,7 +312,7 @@ def S_Type_Encoding(line,location):
 def I_Type_Encoding(line,location):
     #[31:20]     [19:15]    [14:12]    [11:7]   [6:0]
    
-    #imm[11:0]     rs1       funct3      rd     opcode
+    #imm[11:0]     rs1      funct3      rd     opcode
     
     #"lw a5,20(s1)"
     
@@ -347,9 +347,9 @@ def I_Type_Encoding(line,location):
     return binary_answer
     
 def B_Type_Encoding(line,location):
-    #    [31:25]     [24:20]    [19:15]    [14: 12]    [11:7]    [6:0]
+    #    [31:25]        [24:20]    [19:15]    [14: 12]      [11:7]       [6:0]
     
-    #   imm[12|10:5]      rs2        rs1       funct3    imm[4:1|11]   opcode 
+    #   imm[12|10:5]      rs2        rs1       funct3     imm[4:1|11]    opcode 
     
 
     #blt a4,a5,label
@@ -374,9 +374,9 @@ def B_Type_Encoding(line,location):
 
 def U_Type_Encoding(line,location) : 
 
-    #  [31:12]    [11:7]   [6:0]
+    #  [31:12]    [11:7]     [6:0]
 
-    # imm[31:12]    rd     opcode
+    # imm[31:12]    rd       opcode
 
         list1= line.split()
         list2= list1[1].split(',')
@@ -397,9 +397,9 @@ def U_Type_Encoding(line,location) :
 
 
 def J_Type_Encoding(line, location):
-    #         [31:12]         [11:7]    [6:0]
+    #         [31:12]           [11:7]    [6:0]
     
-    # imm[20|10:1|11|19:12]     ra      opcode
+    # imm[20|10:1|11|19:12]       ra      opcode
 
     list1 = line.split()
     INSTRUCTION = list1[0]
