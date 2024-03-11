@@ -133,8 +133,8 @@ halt_encountered = False  # This will be false until a hlt is enountered, if any
 
 
 def binary(num):  # converts any integer into 12 bit binary representation, only valid for 12 bit numbers, i.e. 0 to 4096
-    return "{:012b}".format(num)
-
+    answer="{:012b}".format(num)
+    return str(answer)
 
 def terminate():
     exit(0)
@@ -153,7 +153,7 @@ def go_down_line_by_line(line,location):
         print(f'line {location}: ILLEGAL_COMMAND: HALT already encountered')
         terminate()
     else:
-        check_instruction(line,location)
+        check_instruction_type(line,location)
         Address +=1
         
 def no_error_in_register_name(register,location):
@@ -170,7 +170,26 @@ def no_error_in_label_name(name,location):
         print(f'line {location}: UNDECLARED_LABEL: {name} used without declaration')
         terminate()
         
-def R_Type_Encoding(line):
+def check_instruction_type(line,location):
+    list1=line.split()
+    the_type=instruction_type[list1[0]]
+    if the_type== 'R':
+        return R_Type_Encoding(line,location)
+    elif the_type== 'I':
+        return I-Type-Encoding(line,location)
+    elif the_type== 'B':
+        return B-Type-Encoding(line,location)
+    elif the_type== 'S':
+        return S-Type-Encoding(line,location)
+    elif the_type== 'U':
+        return U-Type-Encoding(line,location)
+    elif the_type== 'J':
+        return J-Type-Encoding(line,location)
+    else:
+        print(f'line {location}: ILLEGAL_INSTRUCTION_ERROR: {list1[0]} not a valid instruction. ')
+        
+    
+def R_Type_Encoding(line,location):
     #    [31: 25]     [24:20]     [19:15]     [14: 12]     [11:7]     [6:0]
     
     #     funct7        rs2         rs1        funct3        rd       opcode
@@ -184,15 +203,51 @@ def R_Type_Encoding(line):
     #list3's first element is the instruction (add,sub,and,etc) according to which we will extract our opcode,funct7 and funct3
     #list3's second,third and fourth value are the rd,rs1 and rs2 registers whose encoding we find out from register encoding disctionary
     
-    INSTRUCTION=list3[0]
+    # We first check if the registers are valid or not
+    no_error_in_register_name(list3[1],location)
+    no_error_in_register_name(list3[2],location)
+    no_error_in_register_name(list3[3],location)
+    
+    INSTRUCTION=list3[0] 
     FUNCT7= funct7[INSTRUCTION]
     FUNCT3=funct3[INSTRUCTION]
     OPCODE=OPCODES[INSTRUCTION]
+    #FUNCT7,FUNCT3 and OPCODE are the funct7,funct3 and opcode corresponding to the instruction
     rd=Register_Encoding[list3[1]]
     rs1=Register_Encoding[list3[2]]
     rs2=Register_Encoding[list3[3]]
+    #rd,rs1,rs2 are the binary encodings of the given registers
     binary_answer= FUNCT7+rs2+rs1+FUNCT3+rd+OPCODE
     print(binary_answer)
     
-R_Type_Encoding('add s1,s2,s3')
     
+def S_Type_Encoding(line,location):
+    #    [31:25]     [24:20]    [19:15]    [14: 12]    [11:7]    [6:0]
+    
+    #   imm[11:5]      rs2        rs1       funct3    imm[4:0]   opcode 
+    
+    
+    #sw ra,32(sp)
+    list1=line.split()
+    list2= list1[1].split(',')
+    list3=list2[1].split('(')
+    list4=[]
+    list4.append(list1[0])
+    list4.append(list2[0])
+    list4.append(list3[0])
+    element=list3[1][:-1]
+    list4.append(element)
+    #now my list4 contains first element as instruction sw, thn second element as rs2, third element as immediate value and foruth value as the rs1
+
+    INSTRUCTION=list4[0]
+    FUNCT3=funct3[INSTRUCTION]
+    OPCODE=OPCODES[INSTRUCTION]
+    #FUNCT3 and OPCODE are the funct3 and opcode corresponding to the instruction
+    rs2=Register_Encoding[list4[1]]
+    rs1=Register_Encoding[list4[3]]
+    #rs1,rs2 are the binary encodings of the given registers
+    IMM=list4[2]
+    IMMEDIATE=binary(IMM)
+    out_of_bound_length(IMM)
+    binary_answer= IMMEDIATE[11:5]+rs2+rs1+FUNCT3+IMMEDIATE[4:0]+OPCODE
+    print(binary_answer)
