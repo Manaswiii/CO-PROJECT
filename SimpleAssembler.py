@@ -325,3 +325,26 @@ def B_Type_Encoding(line,location):
     IMMEDIATE=string_to_n_bit_twos_complement_binary(12,IMM,location)
     binary_answer= IMMEDIATE[0]+IMMEDIATE[2:8]+rs2+rs1+FUNCT3+IMMEDIATE[8:11]+IMMEDIATE[-1]+IMMEDIATE[1]+OPCODE
     print(binary_answer)
+
+def U_Type_Encoding(line,location) : 
+
+    #  [31:12]    [11:7]   [6:0]
+
+    # imm[31:12]    rd     opcode
+
+        list1= line.split()
+        list2= list1[1].split(',')
+        list3=[]
+        list3.append(list1[0])
+        for i in list2:
+            list3.append(i)
+    #list3 first element is lui or auipc
+    #list3 2nd element is rd and 3rd element is the immediate value
+        no_error_in_register_name(list3[1],location)
+        INSTRUCTION = list3[0]
+        OPCODE=OPCODES[INSTRUCTION]
+        RD= Register_Encoding[list3[1]]
+        IMM = list[2]
+        IMMEDIATE = string_to_n_bit_twos_complement_binary(IMM,location)
+        binary_answer = IMMEDIATE[31:12:-1]+RD+OPCODE
+        print(binary_answer)
