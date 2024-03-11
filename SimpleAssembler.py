@@ -131,19 +131,24 @@ global Address
 # flag
 halt_encountered = False  # This will be false until a hlt is enountered, if any instruction is encountered after the variable being true it'll throw an error
 
-def string_to_n_bit_twos_complement_binary(n,input_string,location):
+
+def string_to_n_bit_twos_complement_binary(n, input_string, location):
     try:
         input_integer = int(input_string)
     except ValueError:
-        print( f'line {location}: ILLEGAL_IMMEDIATE: not a valid integer.')
+        print(f'line {location}: ILLEGAL_IMMEDIATE: Not a valid integer.')
         terminate()
 
-    if input_integer < -2**(n-1) or input_integer > 2**(n-1) - 1:
-        print(f"line {location}: OUT_OF_BOUND: Input integer out of range for 12-bit two's complement.")
+    min_value = -2**(n-1)
+    max_value = 2**(n-1) - 1
+
+    if not (min_value <= input_integer <= max_value):
+        print(f"line {location}: OUT_OF_BOUND: Input integer out of range for {n}-bit two's complement.")
+        print(f"Allowed range: [{min_value}, {max_value}]")
         terminate()
 
     if input_integer < 0:
-        # For negative numbers, we'll use 2's complement representation
+        # For negative numbers, use 2's complement representation
         input_binary = bin((1 << n) + input_integer)[2:]
     else:
         input_binary = bin(input_integer)[2:]
@@ -344,7 +349,9 @@ def U_Type_Encoding(line,location) :
         INSTRUCTION = list3[0]
         OPCODE=OPCODES[INSTRUCTION]
         RD= Register_Encoding[list3[1]]
-        IMM = list[2]
-        IMMEDIATE = string_to_n_bit_twos_complement_binary(IMM,location)
-        binary_answer = IMMEDIATE[31:12:-1]+RD+OPCODE
+        IMM = list3[2]
+        IMMEDIATE = string_to_n_bit_twos_complement_binary(32,IMM,location)
+        binary_answer = IMMEDIATE[11:31]+RD+OPCODE
         print(binary_answer)
+
+U_Type_Encoding("auipc s2,-30",3)
