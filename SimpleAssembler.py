@@ -177,10 +177,6 @@ def no_error_in_register_name(register,location):
     if register not in Register_Encoding.keys():
         print(f'line {location}: ILLEGAL_REGISTER_ERROR: {register} not a valid register. ')
         terminate()
-    
-def out_of_bound_length(value,location):
-    if value<=0 or value>=4095:
-        print(f'line {location}: OVERFLOW: {value} not in the range 0-4095')
 
 def no_error_in_label_name(name,location): 
     if name not in label_table:
