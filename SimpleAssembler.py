@@ -128,6 +128,8 @@ funct7={
 
 label_table=dict()
 global Address 
+Address =0
+
 # flag
 halt_encountered = False  # This will be false until a hlt is enountered, if any instruction is encountered after the variable being true it'll throw an error
 
@@ -160,22 +162,43 @@ def string_to_n_bit_twos_complement_binary(n, input_string, location):
 def terminate():
     exit(0)
     
+def is_a_label(line):
+    is_label=False
+    for i in line:
+        if i == ":":
+            is_label=True
+    return is_label
+
+def decimal_to_hexadecimal(decimal_num):
+    # Using the built-in format() function to convert decimal to formatted hexadecimal
+    hex_value = format(decimal_num, '08x')
+    
+    return f'0x{hex_value}'
+
+global location
+location=decimal_to_hexadecimal(Address)
+
 def go_down_line_by_line(line,location):
     global Address
     if not line:
         return
-    elif line[-1] == ':':
-        label_name = line[:-1].lstrip()
+    #code for handling whitespaces and empty lines
+    elif is_a_label(line)==True:
+        label_name = line.split(":")[0]
         if label_name in label_table:
             print(f'line {location}: ILLEGAL_LABEL: {label_name} already a label')
             terminate()
-        label_table[label_name] = Address
+        label_table[label_name] = location
+        x=len(label_name)
+        line=line[x+1:]
+        go_down_line_by_line(line,location)
+        
     elif halt_encountered:
         print(f'line {location}: ILLEGAL_COMMAND: HALT already encountered')
         terminate()
     else:
         check_instruction_type(line,location)
-        Address +=1
+        Address +=4
         
 def no_error_in_register_name(register,location):
     if register not in Register_Encoding.keys():
@@ -260,6 +283,9 @@ def S_Type_Encoding(line,location):
     FUNCT3=funct3[INSTRUCTION]
     OPCODE=OPCODES[INSTRUCTION]
     #FUNCT3 and OPCODE are the funct3 and opcode corresponding to the instruction
+    no_error_in_register_name(list4[1],location)
+    no_error_in_register_name(list4[3],location)
+    #checking for errors in reg name
     rs2=Register_Encoding[list4[1]]
     rs1=Register_Encoding[list4[3]]
     #rs1,rs2 are the binary encodings of the given registers
@@ -321,6 +347,8 @@ def B_Type_Encoding(line,location):
     FUNCT3=funct3[INSTRUCTION]
     OPCODE=OPCODES[INSTRUCTION]
     #FUNCT3 and OPCODE are the funct3 and opcode corresponding to the instruction
+    no_error_in_register_name(list2[1],location)
+    no_error_in_register_name(list2[0],location)
     rs2=Register_Encoding[list2[1]]
     rs1=Register_Encoding[list2[0]]
     #rs1,rs2 are the binary encodings of the given registers
@@ -352,9 +380,11 @@ def U_Type_Encoding(line,location) :
         binary_answer = IMMEDIATE[11:31]+RD+OPCODE
         print(binary_answer)
 
+
 def J_Type_Encoding(line, location):
-    # [31:12]                [11:7]   [6:0]
-    # imm[20|10:1|11|19:12]   ra      opcode
+    #        [31:12]                [11:7]    [6:0]
+    
+    # imm[20|10:1|11|19:12]           ra      opcode
 
     # jal ra,label
     list1 = line.split()
@@ -375,8 +405,3 @@ def J_Type_Encoding(line, location):
     IMMEDIATE = string_to_n_bit_twos_complement_binary(21,IMM, 1)
     binary_answer = IMMEDIATE[0]+IMMEDIATE[10:20]+IMMEDIATE[9]+IMMEDIATE[1:9] + ra + OPCODE 
     print(binary_answer)
-    
-
-
-
-J_Type_Encoding("jal ra,-1024", 1) 
