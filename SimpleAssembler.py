@@ -189,15 +189,15 @@ def check_instruction_type(line,location):
     if the_type== 'R':
         return R_Type_Encoding(line,location)
     elif the_type== 'I':
-        return I-Type-Encoding(line,location)
+        return I_Type_Encoding(line,location)
     elif the_type== 'B':
-        return B-Type-Encoding(line,location)
+        return B_Type_Encoding(line,location)
     elif the_type== 'S':
-        return S-Type-Encoding(line,location)
+        return S_Type_Encoding(line,location)
     elif the_type== 'U':
-        return U-Type-Encoding(line,location)
+        return U_Type_Encoding(line,location)
     elif the_type== 'J':
-        return J-Type-Encoding(line,location)
+        return J_Type_Encoding(line,location)
     else:
         print(f'line {location}: ILLEGAL_INSTRUCTION_ERROR: {list1[0]} not a valid instruction. ')
         
