@@ -264,6 +264,6 @@ def S_Type_Encoding(line,location):
     rs1=Register_Encoding[list4[3]]
     #rs1,rs2 are the binary encodings of the given registers
     IMM=list4[2]
-    IMMEDIATE=string_to_12bit_twos_complement_binary(IMM)
+    IMMEDIATE=string_to_12bit_twos_complement_binary(IMM,location)
     binary_answer= IMMEDIATE[11:5]+rs2+rs1+FUNCT3+IMMEDIATE[4:0]+OPCODE
     print(binary_answer)
