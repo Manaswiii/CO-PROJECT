@@ -443,4 +443,7 @@ def J_Type_Encoding(line, location):
         return binary_answer
 
 f=open('automatedTesting/tests/assembly/simpleBin/test1.txt','r')
-remove_whitespace_and_empty_lines("automatedTesting/tests/assembly/simpleBin/test1.txt", output_filepath):
+remove_whitespace_and_empty_lines("automatedTesting/tests/assembly/simpleBin/test1.txt", "output/test1.txt")
+
+f=open("output/test1.txt",'w')
+
