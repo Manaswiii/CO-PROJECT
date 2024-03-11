@@ -193,11 +193,8 @@ def decimal_to_hexadecimal(decimal_num):
 global location
 location=decimal_to_hexadecimal(Address)
 
-def go_down_line_by_line(line,location):
+def go_down_line_by_line(line):
     global Address
-    if not line:
-        return
-    #code for handling whitespaces and empty lines
     elif is_a_label(line)==True:
         label_name = line.split(":")[0]
         if label_name in label_table:
@@ -206,7 +203,7 @@ def go_down_line_by_line(line,location):
         label_table[label_name] = location
         x=len(label_name)
         line=line[x+1:]
-        go_down_line_by_line(line,location)
+        go_down_line_by_line(line)
         
     elif halt_encountered:
         print(f'line {location}: ILLEGAL_COMMAND: HALT already encountered')
