@@ -169,6 +169,59 @@ def execute_i_type(instruction, rd, rs1, imm, registers, memory):
         pc = registers[rs1] + imm
     else:
         raise ValueError("Unsupported I-type instruction")
+        
+def execute_b_type(instruction,rs1,rs2,imm,pc):
+    opcode = OPCODES[instruction]
+    funct3_val = func3[instruction]
+    if rs1 not in Register_encoding or rs2 not in Register_Encoding:
+        raise ValueError("Invalid register number")
+
+    if instruction == "beq":
+         offset = (imm << 1) | 0b0
+         target_address = pc + offset
+         if rs1 == rs2:  
+            return target_address, True  
+         else:
+            return pc + 4, False
+    if instruction == "bne":
+         offset = (imm << 1) | 0b0  
+         target_address = pc + offset  
+        
+         if rs1 != rs2:  
+            return target_address, True  
+         else:
+            return pc + 4, False
+
+    if instruction == "blt":
+        offset = (imm << 1) | 0b0  
+        target_address = pc + offset 
+        if sext(rs1, 32) >= sext(rs2, 32):
+            return pc + 4, False
+        else:
+            return target_address, True
+    if instruction == "bltu":
+        offset = (imm << 1) | 0b0  
+        target_address = pc + offset 
+        if unsigned(rs1, 32) >= unsigned(rs2, 32):
+            return pc + 4, False
+        else:
+            return target_address, True
+
+    if instruction == "bge":
+        offset = (imm << 1) | 0b10  
+        target_address = pc + offset 
+        if sext(rs1, 32) < sext(rs2, 32):
+            return pc + 4, False
+        else:
+            return target_address, True
+
+    if instruction == "bgeu": 
+        offset = (imm << 1) | 0b0  
+        target_address = pc + offset 
+        if unsigned(rs1, 32) < unsigned(rs2, 32):
+            return pc + 4, False
+        else:
+            return target_address, True 
 
 def decode_instruction(instruction):
     opcode = instruction & 0b1111111
@@ -185,6 +238,8 @@ def execute_instruction(instruction, rd, rs1, rs2, registers, memory):
         execute_r_type(instruction, rd, rs1, rs2, registers)
     elif instruction_type == "I":
         execute_i_type(instruction, rd, rs1, imm, registers, memory)
+    elif instruction_type == "B":
+        execute_b_type(instruction,rs1,rs2,imm,pc)
     # Implement handling for other instruction types as needed
 
 def output_machine_state(pc, registers, memory):
