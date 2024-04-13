@@ -201,25 +201,3 @@ def output_machine_state(pc, registers, memory):
 
     return output
 
-# Example usage:
-registers = {
-    "x1": 10,
-    "x2": 20,
-    "x3": 0
-}
-memory = {
-    0: 100,
-    1: 200,
-    2: 300
-}
-instruction = 0b10000010010000100110000000110011
-
-opcode = instruction & 0b1111111
-rd = (instruction >> 7) & 0b11111
-rs1 = (instruction >> 15) & 0b11111
-rs2 = (instruction >> 20) & 0b11111
-
-execute_instruction(instruction, rd, rs1, rs2, registers, memory)
-
-machine_state_output = output_machine_state(1000, registers, memory)
-print(machine_state_output)
