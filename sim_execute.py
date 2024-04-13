@@ -1,5 +1,0 @@
-def execute():
-  """"
-  type: A
-  
-  """"
