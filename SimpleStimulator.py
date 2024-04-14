@@ -232,14 +232,7 @@ def execute_b_type(instruction,rs1,rs2,imm,pc):
         else:
             return target_address, True 
 
-def decode_instruction(instruction):
-    opcode = instruction & 0b1111111
 
-    for inst, opcode_value in OPCODES.items():
-        if opcode_value == opcode:
-            return inst
-
-    return "Unknown"
 
 def execute_instruction(instruction, rd, rs1, rs2, registers, memory):
     instruction_type = instruction_type[decode_instruction(instruction)]
@@ -250,18 +243,4 @@ def execute_instruction(instruction, rd, rs1, rs2, registers, memory):
     elif instruction_type == "B":
         execute_b_type(instruction,rs1,rs2,imm,pc)
     # Implement handling for other instruction types as needed
-
-def output_machine_state(pc, registers, memory):
-    pc_str = format(pc, '032b')
-
-    register_values = [registers.get(f"x{i}", 0) for i in range(32)]
-    registers_str = ' '.join(format(val, '032b') for val in register_values)
-
-    memory_str = ""
-    for address in range(32):
-        memory_str += format(memory.get(address, 0), '032b') + '\n'
-
-    output = f"{pc_str} {registers_str}\n{memory_str}"
-
-    return output
 
