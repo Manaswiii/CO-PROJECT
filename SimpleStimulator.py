@@ -121,6 +121,15 @@ funct7 = {
     'and': '0000000'
 }
 
+def sext(value, bits):
+    
+    if value & (1 << (bits - 1)):
+        return value - (1 << bits)
+    else:
+        return value
+def unsigned(value, bits):
+    return value & ((1 << bits) - 1)
+
 def execute_r_type(instruction, rd, rs1, rs2, registers):
     opcode = OPCODES[instruction]
     funct3_val = funct3[instruction]
