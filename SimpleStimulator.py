@@ -208,7 +208,7 @@ if not PC:
 #OPENING FILE FOR OUTPUT IN WRITE MODE
 
 OUTPUTS=[]
-r=open("C:\\Users\\navsh\\Downloads\\Sem_2\\output.txt",'w')
+r=open("out.txt",'w')
 
 #***********************************
 
