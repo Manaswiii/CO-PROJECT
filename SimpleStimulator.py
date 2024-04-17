@@ -1,7 +1,7 @@
 #INPUT FILE AND ITS CONTENT ADDED IN A LIST OF LINES
 
 
-f = open("C:\\Users\\navsh\\Downloads\\Sem_2\\input.txt", "r")
+f = open("in.txt", "r")
 lines = f.readlines()
 if not lines:
     print("Error: Input file is empty")
