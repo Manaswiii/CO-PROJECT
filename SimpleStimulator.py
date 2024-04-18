@@ -7,7 +7,6 @@ if not lines:
     print("Error: Input file is empty")
     exit()
 
-
 for line in lines:
     line = line.strip()
 num_lines = len(lines)
@@ -16,7 +15,7 @@ num_lines = len(lines)
 # print("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
 
 
-#***********************************************************************************************************
+#*************************************
 
 
 #DICTIONARIES USED IN THE SIMULATOR
@@ -204,14 +203,14 @@ if not PC:
     print("Error: PC dictionary is empty")
     exit()
 
-#********************************************************************************************************
+#************************************
 
 #OPENING FILE FOR OUTPUT IN WRITE MODE
 
 OUTPUTS=[]
 r=open("out.txt",'w')
 
-#*********************************************************************************************************
+#***********************************
 
 #FUNCTIONS USED IN THE CODE
 
@@ -402,7 +401,7 @@ def execute_instruction(instruction,PC_Execution):
 #     return
       
 
-#*********************************************************************************************************
+#***********************************
 
 # PC IMPLEMENTATION AND ACTUAL EXECTUTION OF THE SIMULATOR
 
