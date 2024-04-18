@@ -7,6 +7,7 @@ if not lines:
     print("Error: Input file is empty")
     exit()
 
+
 for line in lines:
     line = line.strip()
 num_lines = len(lines)
@@ -15,7 +16,7 @@ num_lines = len(lines)
 # print("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
 
 
-#*************************************
+#***********************************************************************************************************
 
 
 #DICTIONARIES USED IN THE SIMULATOR
@@ -203,14 +204,14 @@ if not PC:
     print("Error: PC dictionary is empty")
     exit()
 
-#************************************
+#********************************************************************************************************
 
 #OPENING FILE FOR OUTPUT IN WRITE MODE
 
 OUTPUTS=[]
 r=open("out.txt",'w')
 
-#***********************************
+#*********************************************************************************************************
 
 #FUNCTIONS USED IN THE CODE
 
@@ -275,51 +276,42 @@ def execute_i_type(instruction, rd, rs1, immediate,func3,opcode,PC_Execution):
 def execute_b_type(instruction,rs1,rs2,immediate,func3,PC_Execution):
     imm=binary_to_decimal(immediate)
     if  func3 =="000":
-         offset = (imm << 1) | 0b0
-         target_address = PC_Execution + offset
-         if Register_value[rs1 ]==Register_value[rs2]:  
-            return target_address, True  
-         else:
-            return PC_Execution + 4, False
+        offset = sext(immediate,12)
+         
+        if Register_value[rs1 ]==Register_value[rs2]:  
+            PC_Execution += offset
+         
     if  func3 =="001":
-         offset = (imm << 1) | 0b0  
-         target_address = PC_Execution + offset  
+        offset = sext(immediate,12)  
+           
         
-         if Register_value[rs1] != Register_value[rs2]:  
-            return target_address, True  
-         else:
-            return PC_Execution + 4, False
+        if Register_value[rs1] != Register_value[rs2]:  
+            PC_Execution += offset  
+         
 
     if  func3 =="100":
-        offset = (imm << 1) | 0b0  
-        target_address = PC_Execution + offset 
-        if sext(Register_value[rs1], 32) >= sext(Register_value[rs2], 32):
-            return PC_Execution + 4, False
-        else:
-            return target_address, True
+        offset = sext(immediate,12)  
+        
+        if sext(Register_value[rs1], 32) < sext(Register_value[rs2], 32):
+            PC_Execution += offset
+
     if  func3 =="110":
-        offset = (imm << 1) | 0b0  
-        target_address = PC_Execution + offset 
-        if unsigned(Register_value[rs1], 32) >= unsigned(Register_value[rs2], 32):
-            return PC_Execution + 4, False
-        else:
-            return target_address, True
+        offset = sext(immediate,12)  
+        
+        if unsigned(Register_value[rs1], 32) < unsigned(Register_value[rs2], 32):
+            PC_Execution += offset
 
     if  func3 =="101":
-        offset = (imm << 1) | 0b10  
-        target_address = PC_Execution + offset 
-        if sext(Register_value[rs1], 32) < sext(Register_value[rs2], 32):
-            return PC_Execution + 4, False
-        else:
-            return target_address, True
+        offset = sext(immediate,12)  
+        
+        if sext(Register_value[rs1], 32) >= sext(Register_value[rs2], 32):
+            PC_Execution += offset
 
     if  func3 =="111":
-        offset = (imm << 1) | 0b0  
-        target_address = PC_Execution + offset 
-        if unsigned(Register_value[rs1], 32) < unsigned(Register_value[rs2], 32):
-            return PC_Execution + 4, False
-        else:
-            return target_address, True 
+        offset = sext(immediate,12)  
+        
+        if unsigned(Register_value[rs1], 32) >= unsigned(Register_value[rs2], 32):
+            PC_Execution += offset
 
 def execute_s_type(instruction,rs2,rs1,immediate,func3,opcode,PC_Execution):
     imm = binary_to_decimal(immediate)
@@ -410,7 +402,7 @@ def execute_instruction(instruction,PC_Execution):
 #     return
       
 
-#***********************************
+#*********************************************************************************************************
 
 # PC IMPLEMENTATION AND ACTUAL EXECTUTION OF THE SIMULATOR
 
