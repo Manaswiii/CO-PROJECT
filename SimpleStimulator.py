@@ -1,7 +1,7 @@
 #INPUT FILE AND ITS CONTENT ADDED IN A LIST OF LINES
+import sys
 
-
-f = open("in.txt", "r")
+f = open(sys.argv[1], "r")
 lines = f.readlines()
 if not lines:
     print("Error: Input file is empty")
@@ -15,7 +15,7 @@ num_lines = len(lines)
 # print("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
 
 
-#*************************************
+#*************
 
 
 #DICTIONARIES USED IN THE SIMULATOR
@@ -195,34 +195,72 @@ MEMORY={
 num_lines = len(lines)
 PC = {}
 
-for i in range(0, num_lines * 4, 4):
-    line_index = i // 4
+for i in range(4, num_lines * 4, 4):
+    line_index = (i // 4 )-1
     line = lines[line_index]
     PC[i] = line
 if not PC:
     print("Error: PC dictionary is empty")
     exit()
 
-#************************************
+#************
 
 #OPENING FILE FOR OUTPUT IN WRITE MODE
 
 OUTPUTS=[]
-r=open("out.txt",'w')
+r=open(sys.argv[2],'w')
 
-#***********************************
+#*************
 
 #FUNCTIONS USED IN THE CODE
 
+def hex_to_decimal(hex_string):
+    # Remove the '0x' prefix if present
+    hex_string = hex_string[2:] if hex_string.startswith('0x') else hex_string
+    # Convert hexadecimal string to decimal
+    decimal_value = int(hex_string, 16)
+    return decimal_value
+
+def decimal_to_hex(decimal):
+    # Convert the decimal number to hexadecimal
+    hex_value = hex(decimal & 0xFFFFFFFF)  # Mask with 0xFFFFFFFF to ensure only 32 bits are considered
+    # Ensure the hex value has at least 8 characters (excluding '0x')
+    hex_value = hex_value[2:].zfill(8)
+    # Convert the hex string to a list of characters
+    hex_list = list(hex_value)
+    # Set the 5th bit from the right (index 4) to 1
+    hex_list[-5] = '1'
+    # Construct the 32-bit hexadecimal representation
+    hex_representation = "0x" + ''.join(hex_list)
+    return hex_representation
+
 def dec_to_bin_32(num):
-    binary = bin(num)[2:]
-    binary = binary.zfill(32)
+    num = int(num)
+    if num < 0:
+        positive_binary = bin(-num)[2:]
+        positive_binary = positive_binary.zfill(31)
+        # Invert the bits
+        inverted_bits = ''.join('0' if bit == '1' else '1' for bit in positive_binary)
+        # Add 1
+        binary = bin(int(inverted_bits, 2) + 1)[2:]
+    else:
+        binary = bin(num)[2:]
+        binary = binary.zfill(32)
     return binary
 
-def binary_to_decimal(binary_str):
-    # Convert binary string to decimal integer using int() function with base 2
+
+def unsigned_binary_to_decimal(binary_str):
     decimal_value = int(binary_str, 2)
-    return (decimal_value)
+    return decimal_value
+
+def signed_binary_to_decimal(binary_str):
+    if binary_str[0] == '0': 
+        return unsigned_binary_to_decimal(binary_str)
+    else:
+        flipped_bits = ''.join('1' if bit == '0' else '0' for bit in binary_str)
+        decimal_value = unsigned_binary_to_decimal(flipped_bits) + 1
+        return -decimal_value
+
 
 def sext(value, bits):
     if int(value) & (1 << (bits - 1)):
@@ -232,122 +270,320 @@ def sext(value, bits):
     
 def unsigned(value, bits):
     return int(value) & ((1 << bits) - 1)
+def add(rd, rs1, rs2):
+    # Convert register values to binary
+    rs1_binary = dec_to_bin_32(rs1)
+    rs2_binary = dec_to_bin_32(rs2)
+    
+    # Convert binary values to decimal
+    rs1_decimal = signed_binary_to_decimal(rs1_binary)
+    rs2_decimal = signed_binary_to_decimal(rs2_binary)
+    
+    # Perform addition
+    result_decimal = rs1_decimal + rs2_decimal
+    
+    # Convert the result back to binary
+    result_binary = dec_to_bin_32(result_decimal)
+    
+    # Store the result in the destination register
+    Register_value[rd] = result_decimal
+
+def sub(rd, rs1, rs2):
+    # Special case: sub rd, x0, rs
+    if rd == '00000':
+        Register_value[rs2] = -Register_value[rs2]  # Negate the value in register rs2
+    
+    # Convert register values to binary
+    rs1_binary = dec_to_bin_32(rs1)
+    rs2_binary = dec_to_bin_32(rs2)
+    
+    # Convert to signed binary
+    rs1_signed = sext(rs1_binary, 32)
+    rs2_signed = sext(rs2_binary, 32)
+    
+    # Perform subtraction
+    result_binary = bin(rs1_signed - rs2_signed)[2:].zfill(32)
+    
+    # Convert binary result back to decimal
+    result_decimal = signed_binary_to_decimal(result_binary)
+    
+    # Store the result in the destination register
+    Register_value[rd] = result_decimal
+
+def slt(rd, rs1, rs2):
+    # Convert register values to binary
+    rs1_binary = dec_to_bin_32(rs1)
+    rs2_binary = dec_to_bin_32(rs2)
+    
+    # Sign-extend the binary values
+    rs1_signed = sext(rs1_binary, 32)
+    rs2_signed = sext(rs2_binary, 32)
+    
+    # Perform signed comparison
+    if rs1_signed < rs2_signed:
+        Register_value[rd] = 1
+
+def sltu(rd, rs1, rs2):
+    # Convert register values to binary
+    rs1_binary = dec_to_bin_32(rs1)
+    rs2_binary = dec_to_bin_32(rs2)
+    
+    # Perform unsigned comparison
+    if unsigned_binary_to_decimal(rs1_binary) < unsigned_binary_to_decimal(rs2_binary):
+        Register_value[rd] = 1
+
+def xor(rd, rs1, rs2):
+    # Convert register values to binary
+    rs1_binary = dec_to_bin_32(rs1)
+    rs2_binary = dec_to_bin_32(rs2)
+    
+    # Perform bitwise XOR operation
+    result_binary = bin(rs1_binary - rs2_binary)[2:].zfill(32)
+    
+    # Convert binary result back to decimal
+    result_decimal = unsigned_binary_to_decimal(result_binary)
+    
+    # Store the result in the destination register
+    Register_value[rd] = result_decimal
+
+def sll(rd, rs1, rs2):
+    # Perform logical left shift
+    shift_amount = unsigned_binary_to_decimal(rs2[-5:])
+    result_decimal = Register_value[rs1] << shift_amount
+    
+    # Store the result in the destination register
+    Register_value[rd] = result_decimal
+
+def srl(rd, rs1, rs2):
+    # Perform logical right shift
+    shift_amount = unsigned_binary_to_decimal(rs2[-5:])
+    result_decimal = Register_value[rs1] >> shift_amount
+    
+    # Store the result in the destination register
+    Register_value[rd] = result_decimal
+
+def _or(rd, rs1, rs2):
+    # Perform bitwise OR operation
+    result_decimal = Register_value[rs1] | Register_value[rs2]
+    
+    # Store the result in the destination register
+    Register_value[rd] = result_decimal
+
+def _and(rd, rs1, rs2):
+    # Perform bitwise AND operation
+    result_decimal = Register_value[rs1] & Register_value[rs2]
+    
+    # Store the result in the destination register
+    Register_value[rd] = result_decimal
+
 
 def execute_r_type(instruction, rd, rs1, rs2,func3,func7):
     if func3=='000' and func7=='0000000': #instruction == "add":
-        Register_value[rd] = Register_value[rs1] + Register_value[rs2]
+        add(rd,rs1,rs2)
     elif func3=='000' and func7=='0100000':#instruction == "sub":
-        Register_value[rd] = Register_value[rs1] - Register_value[rs2]
+        sub(rd,rs1,rs2)
     elif func3=='001' and func7=='0000000': #instruction == "sll":
-        Register_value[rd] = Register_value[rs1] << (Register_value[rs2] & 0b11111)
+        sll(rd,rs1,rs2)
     elif func3=='010' and func7=='0000000': #instruction == "slt":
-        Register_value[rd] = 1 if Register_value[rs1] < Register_value[rs2] else 0
+        slt(rd,rs1,rs2)
     elif func3=='011' and func7=='0000000': #instruction == "sltu":
-        Register_value[rd] = 1 if (Register_value[rs1] & 0xFFFFFFFF) < (Register_value[rs2] & 0xFFFFFFFF) else 0
+        sltu(rd,rs1,rs2)
     elif func3=='100' and func7=='0000000': #instruction == "xor":
-        Register_value[rd] = Register_value[rs1] ^ Register_value[rs2]
+        xor(rd,rs1,rs2)
     elif func3=='101' and func7=='0000000': #instruction == "srl":
-        Register_value[rd] = Register_value[rs1] >> (Register_value[rs2] & 0b11111)
+        srl(rd,rs1,rs2)
     elif func3=='110' and func7=='0000000': #instruction == "or":
-        Register_value[rd] = Register_value[rs1] | Register_value[rs2]
+        _or(rd,rs1,rs2)
     elif func3=='111' and func7=='0000000': #instruction == "and":
-        Register_value[rd] = Register_value[rs1] & Register_value[rs2]
+        _and(rd,rs1,rs2)
     else:
         raise ValueError("Unsupported R-type instruction")
+    
+def lw(rd, rs1, imm):
+    address = Register_value[rs1] + sext(imm, 12)
+    address_hex = decimal_to_hex(address)  # Convert decimal address to hexadecimal
+    data = MEMORY[address_hex]
+    binary_data = dec_to_bin_32(data)
+    Register_value[rd] = unsigned_binary_to_decimal(binary_data)
+
+def addi(rd, rs, imm):
+    rs_value = dec_to_bin_32(Register_value[rs])
+    imm_value = dec_to_bin_32(sext(imm, 12))
+    result_binary = bin(int(rs_value, 2) + int(imm_value, 2))[2:].zfill(32)
+    Register_value[rd] = signed_binary_to_decimal(result_binary)
+
+def sltiu(rd, rs, imm):
+    rs_value = dec_to_bin_32(Register_value[rs])
+    imm_value = dec_to_bin_32(sext(imm, 12))
+    if unsigned_binary_to_decimal(rs_value) < unsigned_binary_to_decimal(imm_value):
+        Register_value[rd] = 1
+    else:
+        Register_value[rd] = 0
+
+def jalr(rd, rs, offset):
+    rs_value = dec_to_bin_32(Register_value[rs])
+    offset_value = dec_to_bin_32(sext(offset, 12))
+    PC_Execution = signed_binary_to_decimal(rs_value) + signed_binary_to_decimal(offset_value)
+    Register_value[rd] = PC + 4
+    return PC_Execution & 0xFFFFFFFE  # Ensure LSB of PC is 0
+
 
 def execute_i_type(instruction, rd, rs1, immediate,func3,opcode,PC_Execution):
-    imm=binary_to_decimal(immediate)
     if func3=='000' and opcode=='0010011': #instruction == "addi":
-        Register_value[rd] = Register_value[rs1] + imm
+        addi(rd,rs1,immediate)
     elif func3 == '010' and opcode == '0000011':  # instruction == "lw":
-        address_decimal = Register_value[rs1] + imm
-        address_hex = hex(address_decimal)  # Convert decimal address to hexadecimal
-        # Access memory using hexadecimal address
-        Register_value[rd] = MEMORY.get(address_hex, 0)
+        lw(rd,rs1,immediate)
     elif func3=='011' and opcode=='0010011': #instruction == "sltiu":
-        Register_value[rd] = 1 if Register_value[rs1] < imm else 0
+        sltiu(rd,rs1,immediate)
     elif func3=='000' and opcode=='1100111': #instruction == "jalr":
-        Register_value[rd] = PC_Execution + 4
-        PC_Execution = Register_value[rs1] + imm
+        jalr(rd,rs1,immediate)
     else:
         raise ValueError("Unsupported I-type instruction")
+    
+def execute_b_type(instruction, rs1, rs2, immediate, func3, PC_Execution):
+    # offset = signed_binary_to_decimal(immediate)
+    offset = str(sext(int(immediate, 2),32))
+    offset = signed_binary_to_decimal(offset)
+
+    if func3 == "000" and Register_value[rs1] == Register_value[rs2]:
+        PC_Execution += offset
+        # print(offset)
+        # print (PC_Execution)
+
+    elif func3 == "001" and Register_value[rs1] != Register_value[rs2]:
+        PC_Execution += offset
+        # print(offset)
+        # print (PC_Execution)
+
+    elif func3 == "100" and Register_value[rs1] < Register_value[rs2]:
+        PC_Execution += offset
+        # print(offset)
+        # print (PC_Execution)
+
+    elif func3 == "110" and Register_value[rs1] >= Register_value[rs2]:
+        PC_Execution += offset
+        # print(offset)
+        # print (PC_Execution)
+
+    elif func3 == "101" and signed_binary_to_decimal(rs1) < signed_binary_to_decimal(rs2):
+        PC_Execution += offset
+        # print(offset)
+        # print (PC_Execution)
+
+    elif func3 == "111" and signed_binary_to_decimal(rs1) >= signed_binary_to_decimal(rs2):
+        PC_Execution += offset
+        # print(offset)
+        # print (PC_Execution)
+
+    return PC_Execution
+
         
-def execute_b_type(instruction,rs1,rs2,immediate,func3,PC_Execution):
-    imm=binary_to_decimal(immediate)
-    if  func3 =="000":
-        offset = sext(immediate,12)
+# def execute_b_type(instruction,rs1,rs2,immediate,func3,PC_Execution):
+#     imm=signed_binary_to_decimal(immediate)
+#     offset=0
+#     if  func3 =="000":
+#         offset = sext(immediate,12)
          
-        if Register_value[rs1 ]==Register_value[rs2]:  
-            PC_Execution += offset
+#         if Register_value[rs1 ]==Register_value[rs2]:  
+#             PC_Execution += offset
+#             print(type(offset))
          
-    if  func3 =="001":
-        offset = sext(immediate,12)  
-           
-        
-        if Register_value[rs1] != Register_value[rs2]:  
-            PC_Execution += offset  
+#     if  func3 =="001":
+#         offset = sext(immediate,12)  
+#         print(type(offset))
+#         if Register_value[rs1] != Register_value[rs2]:  
+#             PC_Execution += offset  
          
 
-    if  func3 =="100":
-        offset = sext(immediate,12)  
+#     if  func3 =="100":
+#         offset = sext(immediate,12)  
         
-        if sext(Register_value[rs1], 32) < sext(Register_value[rs2], 32):
-            PC_Execution += offset
+#         if sext(Register_value[rs1], 32) < sext(Register_value[rs2], 32):
+#             PC_Execution += offset
+#             print(type(offset))
 
-    if  func3 =="110":
-        offset = sext(immediate,12)  
+#     if  func3 =="110":
+#         offset = sext(immediate,12)  
+#         print(type(offset))
+
+#         if unsigned(Register_value[rs1], 32) < unsigned(Register_value[rs2], 32):
+#             PC_Execution += offset
+
+#     if  func3 =="101":
+#         offset = sext(immediate,12)  
+#         print(type(offset))
         
-        if unsigned(Register_value[rs1], 32) < unsigned(Register_value[rs2], 32):
-            PC_Execution += offset
+#         if sext(Register_value[rs1], 32) >= sext(Register_value[rs2], 32):
+#             PC_Execution += offset
 
-    if  func3 =="101":
-        offset = sext(immediate,12)  
+#     if  func3 =="111":
+#         offset = sext(immediate,12)  
+#         print(type(offset))
         
-        if sext(Register_value[rs1], 32) >= sext(Register_value[rs2], 32):
-            PC_Execution += offset
+#         if unsigned(Register_value[rs1], 32) >= unsigned(Register_value[rs2], 32):
+#             PC_Execution += offset
+#     print(offset)
 
-    if  func3 =="111":
-        offset = sext(immediate,12)  
-        
-        if unsigned(Register_value[rs1], 32) >= unsigned(Register_value[rs2], 32):
-            PC_Execution += offset
-
-def execute_s_type(instruction,rs2,rs1,immediate,func3,opcode,PC_Execution):
-    imm = binary_to_decimal(immediate)
+def execute_s_type(instruction, rs2, rs1, immediate, func3, opcode, PC_Execution):
+    imm = signed_binary_to_decimal(immediate)
     if func3 == "010":
-            address = Register_value[rs1] + sext(imm,32)
+        address = decimal_to_hex(Register_value[rs1] + imm)
 
-    # Store the value in register rs2 to memory at the calculated address
-            MEMORY[address] = Register_value[rs2]
-         
+        # Store the value in register rs2 to memory at the calculated address
+        MEMORY[address] = Register_value[rs2]
     else:
         raise ValueError("Unsupported S-type instruction")
-    
-def execute_u_type(instruction,  rd, imm, opcode, PC_Execution):
-    imm_decimal = binary_to_decimal(imm)
-    if opcode=="0110111": #instruction = lui
-        Register_value[rd] = imm_decimal << 12
-    elif opcode=="0010111":
-        Register_value[rd] = PC_Execution + (imm_decimal << 12)
+
+
+def execute_u_type(instruction, rd, imm, opcode, PC_Execution):
+    imm_decimal = signed_binary_to_decimal(imm)
+    if opcode == "0110111":  # lui
+        # Convert the immediate value to binary
+        imm_binary = dec_to_bin_32(imm_decimal)
+        # Left shift by 12 bits (equivalent to multiplying by 4096)
+        result_binary = imm_binary + '0' * 12
+        # Convert the binary result back to decimal
+        result_decimal = unsigned_binary_to_decimal(result_binary)
+        # Store the result in the destination register
+        Register_value[rd] = result_decimal
+    elif opcode == "0010111":  # auipc
+        # Compute the address
+        address_decimal = PC_Execution + (imm_decimal)
+        # Convert the address to binary
+        address_binary = dec_to_bin_32(address_decimal)
+        # Convert the binary address back to decimal
+        address_decimal = decimal_to_hex(unsigned_binary_to_decimal(address_binary))
+        # Store the address in the destination register
+        Register_value[rd] = address_decimal
     else:
         raise ValueError("Unsupported U-type instruction")
 
 
 def execute_j_type(instruction, rd, imm, opcode, PC_Execution):
-    imm_decimal = binary_to_decimal(imm)
+    imm_decimal = signed_binary_to_decimal(imm)
+    # Store the return address in register rd
     Register_value[rd] = PC_Execution + 4
-    offset = ((int(imm) & 0b111111111111) << 1) | 0b0
-    target_address = PC_Execution + offset
+    # Calculate the target address
+    target_address = PC_Execution + (imm_decimal)
+    # Ensure that the LSB of the target address is 0
     target_address &= 0xFFFFFFFE
-    PC_Execution = target_address
     
+    # Convert the target address to binary
+    target_address_binary = dec_to_bin_32(target_address)
+    
+    # Convert binary target address back to decimal
+    target_address_decimal = signed_binary_to_decimal(target_address_binary)
+    
+    # Update the program counter
+    PC_Execution = target_address_decimal
+
     
 def PC_AND_ALL_REGS_OUTPUT(PC_Execution):
     output = '0b'+ str(dec_to_bin_32(PC_Execution)) + " " 
     register_bin_values = {}  # Dictionary to store binary values for each register key
     
     for key, value in Register_value.items():
-        register_bin_values[key] = dec_to_bin_32(value)  
+        register_bin_values[key] = dec_to_bin_32(value) 
         output += "0b" + register_bin_values[key] + ' '
     output+='\n'
     OUTPUTS.append(output)
@@ -358,7 +594,7 @@ def MEMORY_OUTPUT():
     MEMORY_bin_values = {} 
      # Dictionary to store binary values for each memory key
     for key, value in MEMORY.items():
-        
+        #print(key," :" ,value,"/n")
         MEMORY_bin_values[key] = dec_to_bin_32(value)  
         out = str(key) + ": " + "0b" + MEMORY_bin_values[key] +'\n'
            # Construct the output string for each key-value pair
@@ -373,22 +609,25 @@ def execute_instruction(instruction,PC_Execution):
     types = Decode_Instruction_Type(instruction)
     if types == "R":
         execute_r_type(instruction, instruction[20:25], instruction[12:17], instruction[7:12],instruction[17:20],instruction[0:7])
-        #print("R",instruction[20:25]," ",instruction[12:17]," ",instruction[7:12]," ",instruction[17:20]," ",instruction[0:7])
+        #print(PC_Execution, " R",instruction[20:25]," ",instruction[12:17]," ",instruction[7:12]," ",instruction[17:20]," ",instruction[0:7])
     elif types == "I":
         execute_i_type(instruction, instruction[20:25], instruction[12:17], instruction[0:12],instruction[17:20],instruction[25:32],PC_Execution)
-        #print("I",instruction[20:25]," ",instruction[12:17]," ",binary_to_decimal(instruction[0:12])," ",instruction[17:20]," ",instruction[25:32])
+        #print(PC_Execution, " I",instruction[20:25]," ",instruction[12:17]," ",signed_binary_to_decimal(instruction[0:12])," ",instruction[17:20]," ",instruction[25:32])
     elif types == "B":
         imm=instruction[0]+instruction[24]+instruction[1:7]+instruction[20:26]
-        execute_b_type(instruction,instruction[12:17],instruction[20:25],imm,instruction[17:20],PC_Execution)
-        #print("B",instruction[12:17]," ",instruction[20:25]," ",binary_to_decimal(imm)," ",instruction[17:20]," ",instruction[0:7])
+        PC_Execution=execute_b_type(instruction,instruction[12:17],instruction[20:25],imm,instruction[17:20],PC_Execution)
+        #print(PC_Execution, " B",instruction[12:17]," ",instruction[20:25]," ",signed_binary_to_decimal(imm)," ",instruction[17:20]," ",instruction[0:7])
     elif types == "S":
         imm = instruction[0:7] + instruction[20:25]
         execute_s_type(instruction, instruction[7:12], instruction[12:17], imm, instruction[17:20],instruction[25:31],PC_Execution)
+        #print(PC_Execution, " S",instruction[7:12]," ",instruction[12:17]," ",signed_binary_to_decimal(imm)," ",instruction[17:20]," ",instruction[25:31])
     elif types == "U":
         execute_u_type(instruction,instruction[20:25],instruction[0:20],instruction[25:32],PC_Execution)
+        #print(PC_Execution, " U",instruction[20:25]," ",instruction[0:20]," ",signed_binary_to_decimal(instruction[0:20])," ",instruction[25:32])
     elif types == "J":
         imm = instruction[0] + instruction[12:20] + instruction[11] + instruction[1:11]
         execute_j_type(instruction,instruction[20:25],imm,instruction[25:32],PC_Execution)
+        #print(PC_Execution, " J",instruction[20:25]," ",instruction[0:20]," ",signed_binary_to_decimal(imm)," ",instruction[25:32])
     return types
     # Implement handling for other instruction types as needed
     
@@ -401,7 +640,7 @@ def execute_instruction(instruction,PC_Execution):
 #     return
       
 
-#***********************************
+#*************
 
 # PC IMPLEMENTATION AND ACTUAL EXECTUTION OF THE SIMULATOR
 
